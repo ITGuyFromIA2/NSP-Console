@@ -47,20 +47,25 @@ function Read-NSPMenu {
         if (@($entries | Where-Object { $_.Key -ieq $key }).Count) { throw "Key '$key' is used twice." }
         $entries.Add([pscustomobject]@{
                 Key = $key; Label = [string](Get-Field $choice 'Label'); Value = Get-Field $choice 'Value'
-                Help = [string](Get-Field $choice 'Help'); Section = [string](Get-Field $choice 'Section')
+                Help = [string](Get-Field $choice 'Help'); Section = [string](Get-Field $choice 'Section'); Numbered = -not [string](Get-Field $choice 'Key')
             })
     }
 
     $provided = $PSBoundParameters.ContainsKey('Answer')
     if (-not $provided) {
+        # The lettered options (N, Q, ...) are set apart from the numbered list by a line break.
+        $all = @($entries) + [pscustomobject]@{ Key = $CancelKey; Label = $CancelLabel; Section = $null; Help = $null; Numbered = $false; IsCancel = $true }
         if ($Inline) {
             $width = Get-NSPConsoleWidth
             # $column is the current line's length; 0 means nothing is on it yet.
             $column = 0
-            foreach ($entry in @($entries) + [pscustomobject]@{ Key = $CancelKey; Label = $CancelLabel; Section = $null }) {
+            $previousNumbered = $false
+            foreach ($entry in $all) {
                 if ($entry.Section) {
                     if ($column) { Write-Host ''; $column = 0 }
                     Write-NSPConsoleLine "  $($entry.Section)" -Role Heading
+                } elseif ($previousNumbered -and -not $entry.Numbered -and $column) {
+                    Write-Host ''; $column = 0
                 }
                 $cell = "$($entry.Key) $($entry.Label)   "
                 if ($column -and ($column + $cell.Length) -ge $width) { Write-Host ''; $column = 0 }
@@ -68,18 +73,21 @@ function Read-NSPMenu {
                 Write-NSPConsoleLine $entry.Key -Role Key -NoNewline
                 Write-Host " $($entry.Label)   " -NoNewline
                 $column += $cell.Length
+                $previousNumbered = $entry.Numbered
             }
             Write-Host ''
         } else {
             $keyWidth = (@($entries | ForEach-Object { $_.Key.Length }) + $CancelKey.Length | Measure-Object -Maximum).Maximum
-            foreach ($entry in $entries) {
+            $previousNumbered = $false
+            foreach ($entry in $all) {
                 if ($entry.Section) { Write-NSPConsoleRule -Title $entry.Section -Role Muted }
+                elseif ($previousNumbered -and -not $entry.Numbered) { Write-Host '' }
                 Write-NSPConsoleLine ('  {0}. ' -f $entry.Key.PadLeft($keyWidth)) -Role Key -NoNewline
-                Write-Host $entry.Label
+                if ($entry.PSObject.Properties['IsCancel']) { Write-NSPConsoleLine $entry.Label -Role Muted }
+                else { Write-Host $entry.Label }
                 if ($entry.Help) { Write-NSPConsoleLine ('  {0}  {1}' -f (' ' * $keyWidth), $entry.Help) -Role Muted }
+                $previousNumbered = $entry.Numbered
             }
-            Write-NSPConsoleLine ('  {0}. ' -f $CancelKey.PadLeft($keyWidth)) -Role Key -NoNewline
-            Write-NSPConsoleLine $CancelLabel -Role Muted
         }
     }
 

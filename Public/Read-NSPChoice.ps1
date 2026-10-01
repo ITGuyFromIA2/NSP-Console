@@ -37,7 +37,10 @@ function Read-NSPChoice {
         Write-NSPConsoleLine -Message ('  {0}. ' -f ($index + 1)) -Role Key -NoNewline
         Write-Host $Choices[$index].Label
     }
-    Write-NSPConsoleLine -Message "  $CancelKey. Cancel" -Role Muted
+    # The cancel key is set apart from the numbered list by a blank line.
+    Write-Host ''
+    Write-NSPConsoleLine -Message "  $CancelKey. " -Role Key -NoNewline
+    Write-NSPConsoleLine -Message 'Cancel' -Role Muted
 
     while ($true) {
         $answer = Read-Host $Prompt

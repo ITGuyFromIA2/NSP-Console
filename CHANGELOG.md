@@ -9,7 +9,8 @@ banner, with a right-aligned subtitle), `Write-NSPConsoleRule` (`-- Section ----
 `Write-NSPConsoleSegment` (one line in several colors, with fixed-width cells),
 `Get-NSPConsoleWidth`, and `Clear-NSPConsole` (skipped when output is redirected).
 `Write-NSPConsoleLine` gains the Key (yellow), Accent (magenta), and Strong (white) roles, and
-`Read-NSPChoice` shows its numbers in the Key color.
+`Read-NSPChoice` shows its numbers in the Key color. Both set the lettered options (N, Q, ...) apart
+from the numbered list with a blank line.
 
 ## 0.1.0
 

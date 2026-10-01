@@ -69,6 +69,12 @@ try {
     $script:answers.Enqueue('x')
     $script:answers.Enqueue('n')
     if ((Read-NSPMenu -Choices $menu) -ne 'new') { throw 'A lettered key did not select its entry after a retry.' }
+    # A blank line separates the numbered list from the lettered options, once.
+    $texts = @($script:hostCalls | ForEach-Object { $_.Text })
+    $nIndex = [array]::IndexOf($texts, '  N. ')
+    if ($nIndex -lt 1 -or $texts[$nIndex - 1] -ne '' -or @($texts | Where-Object { $_ -eq '' }).Count -ne 1) {
+        throw "The lettered options are not set apart from the numbered list by one blank line: $($texts -join '|')"
+    }
     if (-not @($script:hostCalls | Where-Object { $_.Text -match '^\s+N\. $' -and $_.Color -eq 'Yellow' }).Count) { throw 'Menu keys are not in the Key color.' }
     if (-not @($script:hostCalls | Where-Object { $_.Text -match 'Allow a country' -and $_.Color -eq 'DarkGray' }).Count) { throw 'Help lines are not shown muted.' }
     $script:answers.Enqueue('2')
