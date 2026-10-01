@@ -55,17 +55,16 @@ function Read-NSPMenu {
     if (-not $provided) {
         if ($Inline) {
             $width = Get-NSPConsoleWidth
+            # $column is the current line's length; 0 means nothing is on it yet.
             $column = 0
-            Write-Host '  ' -NoNewline
             foreach ($entry in @($entries) + [pscustomobject]@{ Key = $CancelKey; Label = $CancelLabel; Section = $null }) {
                 if ($entry.Section) {
-                    if ($column) { Write-Host '' }
-                    Write-NSPConsoleLine "  $($entry.Section)" -Role Muted
-                    Write-Host '  ' -NoNewline
-                    $column = 0
+                    if ($column) { Write-Host ''; $column = 0 }
+                    Write-NSPConsoleLine "  $($entry.Section)" -Role Heading
                 }
                 $cell = "$($entry.Key) $($entry.Label)   "
-                if ($column -and ($column + $cell.Length + 2) -ge $width) { Write-Host ''; Write-Host '  ' -NoNewline; $column = 0 }
+                if ($column -and ($column + $cell.Length) -ge $width) { Write-Host ''; $column = 0 }
+                if (-not $column) { Write-Host '  ' -NoNewline; $column = 2 }
                 Write-NSPConsoleLine $entry.Key -Role Key -NoNewline
                 Write-Host " $($entry.Label)   " -NoNewline
                 $column += $cell.Length
