@@ -30,6 +30,25 @@ to the caller, useful when an outer menu owns navigation. Q cancels and returns 
 `Read-NSPConfirm` defaults to no; `-DefaultYes` changes the blank-answer default.
 `-Selection` and `-Answer` allow callers with an existing noninteractive response.
 
+`Read-NSPMenu` is for screens with more than a plain list. Choices are numbered in order
+unless they carry a `Key` (such as `N` for New), may carry a muted `Help` line and a `Section`
+title, and `-Inline` lays them across the line under a dashboard. Keys are shown yellow.
+
+```powershell
+Clear-NSPConsole
+Write-NSPConsoleHeader -Title 'Tool name' -Subtitle 'contoso.example'
+Write-NSPConsoleSegment -Segment @(@('  Session   ', 'Muted'), @('signed in', 'Success'))
+Write-NSPConsoleRule -Title 'Status'
+$task = Read-NSPMenu -Prompt 'What do you want to do?' -Choices @(
+    [pscustomobject]@{ Label = 'Add travel'; Value = 'travel'; Help = 'Allow sign-ins from a country.' }
+    [pscustomobject]@{ Key = 'N'; Label = 'New client'; Value = 'new' }
+)
+```
+
+`Write-NSPConsoleLine` roles: Normal, Heading and Action (cyan), Success (green), Warning and
+Key (yellow), Error (red), Muted (dark gray), Accent (magenta), and Strong (white).
+`Clear-NSPConsole` does nothing when output is redirected, so logs and tests keep everything.
+
 `Get-NSPConsoleColumnLayout` performs width calculations only. It does not render rows.
 `Set-NSPConsoleMaximized` should be called at interactive startup while the intended
 terminal has focus. It uses UI Automation and silently leaves unsupported hosts unchanged.

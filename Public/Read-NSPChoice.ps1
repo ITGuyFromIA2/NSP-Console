@@ -34,7 +34,8 @@ function Read-NSPChoice {
     }
 
     for ($index = 0; $index -lt $Choices.Count; $index++) {
-        Write-Host ('  {0}. {1}' -f ($index + 1), $Choices[$index].Label)
+        Write-NSPConsoleLine -Message ('  {0}. ' -f ($index + 1)) -Role Key -NoNewline
+        Write-Host $Choices[$index].Label
     }
     Write-NSPConsoleLine -Message "  $CancelKey. Cancel" -Role Muted
 

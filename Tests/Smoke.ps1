@@ -7,7 +7,9 @@ Import-Module $modulePath -Force -ErrorAction Stop
 
 $expected = @(
     'Write-NSPConsoleLine', 'Read-NSPChoice', 'Read-NSPConfirm',
-    'Get-NSPConsoleColumnLayout', 'Set-NSPConsoleMaximized'
+    'Get-NSPConsoleColumnLayout', 'Set-NSPConsoleMaximized',
+    'Read-NSPMenu', 'Write-NSPConsoleHeader', 'Write-NSPConsoleRule',
+    'Write-NSPConsoleSegment', 'Get-NSPConsoleWidth', 'Clear-NSPConsole'
 )
 $actual = @(Get-Command -Module NSP.Console | Select-Object -ExpandProperty Name)
 if (@(Compare-Object $expected $actual).Count) { throw 'The exported command set differs from the manifest.' }
@@ -57,6 +59,38 @@ try {
     $script:answers.Enqueue('yes')
     if (-not (Read-NSPConfirm -Prompt 'Continue?')) { throw 'Confirmation did not retry.' }
     if ($script:answers.Count -ne 0) { throw 'A mocked answer was left unread.' }
+
+    $menu = @(
+        [pscustomobject]@{ Label = 'Add travel'; Value = 'travel'; Help = 'Allow a country for a while.'; Section = 'Tasks' }
+        [pscustomobject]@{ Label = 'Plan policies'; Value = 'plan' }
+        @{ Key = 'N'; Label = 'New tenant'; Value = 'new' }
+    )
+    $script:hostCalls.Clear()
+    $script:answers.Enqueue('x')
+    $script:answers.Enqueue('n')
+    if ((Read-NSPMenu -Choices $menu) -ne 'new') { throw 'A lettered key did not select its entry after a retry.' }
+    if (-not @($script:hostCalls | Where-Object { $_.Text -match '^\s+N\. $' -and $_.Color -eq 'Yellow' }).Count) { throw 'Menu keys are not in the Key color.' }
+    if (-not @($script:hostCalls | Where-Object { $_.Text -match 'Allow a country' -and $_.Color -eq 'DarkGray' }).Count) { throw 'Help lines are not shown muted.' }
+    $script:answers.Enqueue('2')
+    if ((Read-NSPMenu -Choices $menu -Inline) -ne 'plan') { throw 'Numbers do not follow the unkeyed entries.' }
+    if ($null -ne (Read-NSPMenu -Choices $menu -Answer 'Q')) { throw 'Q did not cancel the menu.' }
+    if ((Read-NSPMenu -Choices $menu -Answer '1') -ne 'travel') { throw '-Answer did not select.' }
+    $threw = $false
+    try { Read-NSPMenu -Choices @(@{ Key = 'Q'; Label = 'x'; Value = 1 }) -Answer 'Q' } catch { $threw = $true }
+    if (-not $threw) { throw 'A choice may not use the cancel key.' }
+
+    $script:hostCalls.Clear()
+    Write-NSPConsoleSegment -Segment @('plain ', @('ok', 'Success'), @{ Text = 'long value'; Role = 'Accent'; Width = 6 })
+    $texts = @($script:hostCalls | ForEach-Object { $_.Text })
+    if ($texts[0] -ne 'plain ' -or $script:hostCalls[1].Color -ne 'Green' -or $texts[2] -ne 'long..' -or $script:hostCalls[2].Color -ne 'Magenta') {
+        throw "Segments were not written in order with their colors and widths: $($texts -join '|')"
+    }
+    $script:hostCalls.Clear()
+    Write-NSPConsoleHeader -Title 'Title' -Subtitle 'tenant.example' -Width 40
+    if ($script:hostCalls[0].Text.Length -ne 39 -or -not @($script:hostCalls | Where-Object { $_.Text -eq 'tenant.example' }).Count) { throw 'The header is not sized or does not show the subtitle.' }
+    $script:hostCalls.Clear()
+    Write-NSPConsoleRule -Title 'Policies' -Width 30
+    if ($script:hostCalls[0].Text -ne ('  -- Policies '.PadRight(29, '-'))) { throw "Rule rendered as '$($script:hostCalls[0].Text)'." }
 }
 finally {
     Remove-Item Function:\Read-Host -ErrorAction SilentlyContinue
