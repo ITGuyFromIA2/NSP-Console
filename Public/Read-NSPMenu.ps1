@@ -62,7 +62,9 @@ function Read-NSPMenu {
             $previousNumbered = $false
             foreach ($entry in $all) {
                 if ($entry.Section) {
+                    # A section starts after a blank line, for readability.
                     if ($column) { Write-Host ''; $column = 0 }
+                    Write-Host ''
                     Write-NSPConsoleLine "  $($entry.Section)" -Role Heading
                 } elseif ($previousNumbered -and -not $entry.Numbered -and $column) {
                     Write-Host ''; $column = 0
