@@ -3,8 +3,7 @@ function Write-NSPConsoleHeader {
     .SYNOPSIS
         Writes a screen banner: a rule, the title (with an optional right-aligned subtitle), a rule.
     .DESCRIPTION
-        The width defaults to the console window, capped at 100 characters, so the banner
-        does not wrap in a narrow window.
+        The width follows the console window, up to 200 characters.
     .EXAMPLE
         Write-NSPConsoleHeader -Title 'Saved Answers' -Subtitle 'contoso.example'
     #>
@@ -15,7 +14,7 @@ function Write-NSPConsoleHeader {
         [ValidateRange(20, 1000)][int]$Width
     )
 
-    if (-not $Width) { $Width = [Math]::Min((Get-NSPConsoleWidth), 100) }
+    if (-not $Width) { $Width = [Math]::Min((Get-NSPConsoleWidth), 200) }
     $rule = '=' * ($Width - 1)
     Write-NSPConsoleLine $rule -Role Heading
     $left = "  $Title"

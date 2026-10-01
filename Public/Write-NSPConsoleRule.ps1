@@ -12,7 +12,7 @@ function Write-NSPConsoleRule {
         [ValidateSet('Heading', 'Muted', 'Warning', 'Error', 'Success', 'Accent')][string]$Role = 'Heading'
     )
 
-    if (-not $Width) { $Width = [Math]::Min((Get-NSPConsoleWidth), 100) }
+    if (-not $Width) { $Width = [Math]::Min((Get-NSPConsoleWidth), 200) }
     $start = if ($Title) { "  -- $Title " } else { '  ' }
     Write-NSPConsoleLine ($start.PadRight($Width - 1, '-')) -Role $Role
 }
