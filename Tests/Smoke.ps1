@@ -9,7 +9,8 @@ $expected = @(
     'Write-NSPConsoleLine', 'Read-NSPChoice', 'Read-NSPConfirm',
     'Get-NSPConsoleColumnLayout', 'Set-NSPConsoleMaximized',
     'Read-NSPMenu', 'Write-NSPConsoleHeader', 'Write-NSPConsoleRule',
-    'Write-NSPConsoleSegment', 'Get-NSPConsoleWidth', 'Clear-NSPConsole'
+    'Write-NSPConsoleSegment', 'Get-NSPConsoleWidth', 'Clear-NSPConsole',
+    'Read-NSPNonEmpty', 'Read-NSPOptional', 'Test-NSPBackSignal'
 )
 $actual = @(Get-Command -Module NSP.Console | Select-Object -ExpandProperty Name)
 if (@(Compare-Object $expected $actual).Count) { throw 'The exported command set differs from the manifest.' }
@@ -58,6 +59,25 @@ try {
     $script:answers.Enqueue('maybe')
     $script:answers.Enqueue('yes')
     if (-not (Read-NSPConfirm -Prompt 'Continue?')) { throw 'Confirmation did not retry.' }
+    if ($script:answers.Count -ne 0) { throw 'A mocked answer was left unread.' }
+
+    # Read-NSPNonEmpty: blank retries, then trims; blank keeps the current value; back signal.
+    $script:answers.Enqueue('')
+    $script:answers.Enqueue('  value  ')
+    if ((Read-NSPNonEmpty -Prompt 'Name') -ne 'value') { throw 'Read-NSPNonEmpty did not retry a blank answer and trim.' }
+    if ((Read-NSPNonEmpty -Prompt 'Name' -CurrentValue 'kept' -Answer '') -ne 'kept') { throw 'Blank did not keep the current value.' }
+    if (-not (Test-NSPBackSignal (Read-NSPNonEmpty -Prompt 'Name' -AllowBack -Answer 'Back'))) { throw 'Back was not signalled.' }
+    if ((Read-NSPNonEmpty -Prompt 'Name' -Answer 'b') -ne 'b') { throw "'b' must be a value without -AllowBack." }
+    $threw = $false
+    try { Read-NSPNonEmpty -Prompt 'Name' -Answer ' ' } catch { $threw = $true }
+    if (-not $threw) { throw 'A blank -Answer with no current value must throw.' }
+    # Read-NSPOptional: single prompt, blank -> default, back signal.
+    $script:answers.Enqueue('')
+    if ((Read-NSPOptional -Prompt 'Filter') -ne '') { throw 'Read-NSPOptional blank did not return empty.' }
+    if ((Read-NSPOptional -Prompt 'Port' -Default '1812' -Answer '') -ne '1812') { throw 'Blank did not return the default.' }
+    if (-not (Test-NSPBackSignal (Read-NSPOptional -Prompt 'x' -AllowBack -Answer 'B'))) { throw 'Optional back was not signalled.' }
+    if (Test-NSPBackSignal 'B') { throw 'A plain string must never be the back signal.' }
+    if (Test-NSPBackSignal $null) { throw '$null must not be the back signal.' }
     if ($script:answers.Count -ne 0) { throw 'A mocked answer was left unread.' }
 
     $menu = @(

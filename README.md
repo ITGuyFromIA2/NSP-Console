@@ -30,6 +30,15 @@ to the caller, useful when an outer menu owns navigation. Q cancels and returns 
 `Read-NSPConfirm` defaults to no; `-DefaultYes` changes the blank-answer default.
 `-Selection` and `-Answer` allow callers with an existing noninteractive response.
 
+`Read-NSPNonEmpty` asks until it gets a value; with `-CurrentValue`, a blank answer keeps it.
+`Read-NSPOptional` asks once and may return blank, or `-Default`. With `-AllowBack`, both
+return a back signal when the operator types B or Back; check it with `Test-NSPBackSignal`:
+
+```powershell
+$ou = Read-NSPNonEmpty -Prompt 'Target OU' -AllowBack
+if (Test-NSPBackSignal $ou) { return }
+```
+
 `Read-NSPMenu` is for screens with more than a plain list. Choices are numbered in order
 unless they carry a `Key` (such as `N` for New), may carry a muted `Help` line and a `Section`
 title, and `-Inline` lays them across the line under a dashboard. Keys are shown yellow.

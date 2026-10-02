@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2
+
+Value prompts for wizard-style tools, folded from the IPSec toolkit's AD and CA managers:
+`Read-NSPNonEmpty` (required value; blank retries, or keeps `-CurrentValue`), `Read-NSPOptional`
+(single prompt that may be blank, with `-Default`), and `Test-NSPBackSignal`. Both prompts take
+`-AllowBack`, so B or Back steps back to the previous prompt, and `-Answer` for noninteractive use.
+Also includes the menu and header layout fixes made after 0.1.1: a blank line before each inline
+section, and the header and rule follow the window up to 200 columns.
+
 ## 0.1.1
 
 Dashboard-style screens, folded from the IPSec Master Orchestrator's console code:

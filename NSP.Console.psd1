@@ -1,6 +1,6 @@
 @{
     RootModule = 'NSP.Console.psm1'
-    ModuleVersion = '0.1.1'
+    ModuleVersion = '0.1.2'
     GUID = '49cc39d3-fc4f-44a3-ac3e-e815a99309d6'
     Author = 'Network Systems Plus'
     CompanyName = 'Network Systems Plus'
@@ -19,6 +19,9 @@
         'Write-NSPConsoleSegment'
         'Get-NSPConsoleWidth'
         'Clear-NSPConsole'
+        'Read-NSPNonEmpty'
+        'Read-NSPOptional'
+        'Test-NSPBackSignal'
     )
     CmdletsToExport = @()
     VariablesToExport = @()
@@ -28,7 +31,7 @@
             Tags = @('Console', 'Prompt', 'PowerShell', 'Windows')
             ProjectUri = 'https://github.com/ITGuyFromIA2/NSP-Console'
             LicenseUri = 'https://github.com/ITGuyFromIA2/NSP-Console/blob/main/LICENSE'
-            ReleaseNotes = '0.1.1: Read-NSPMenu (numbered and lettered entries with help lines), screen header, section rule, multi-color line segments, console width, and screen clearing; Key, Accent, and Strong color roles; choice numbers in the Key color.'
+            ReleaseNotes = '0.1.2: Read-NSPNonEmpty and Read-NSPOptional (required and optional value prompts with keep-current, default, and B-to-go-back), Test-NSPBackSignal.'
         }
     }
 }
