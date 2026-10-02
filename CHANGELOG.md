@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+
+`Read-NSPFilePath` asks for an existing file: Enter opens a Windows file picker (on its own STA
+thread, so it also works in PowerShell 7), or the path can be typed or pasted - the quotes from
+Explorer's "Copy as path" are removed. Windows blocks dropping a file onto an elevated console, which
+is why the picker is offered. There is no picker in a remote session, on Server Core, or with
+`NSP_NO_FILEDIALOG=1`. `Set-NSPConsoleMaximized` is now an advanced function (common parameters such
+as `-Verbose`), and the loader dot-sources files in name order.
+
 ## 0.1.2
 
 Value prompts for wizard-style tools, folded from the IPSec toolkit's AD and CA managers:

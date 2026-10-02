@@ -39,6 +39,16 @@ $ou = Read-NSPNonEmpty -Prompt 'Target OU' -AllowBack
 if (Test-NSPBackSignal $ou) { return }
 ```
 
+`Read-NSPFilePath` asks for an existing file. Enter opens a Windows file picker; a typed or pasted
+path works too (Explorer's "Copy as path" quotes are removed). Windows blocks dropping a file onto an
+elevated console, so the picker is the way to "drag" a file in. It returns the full path, or the back
+signal with `-AllowBack`:
+
+```powershell
+$csr = Read-NSPFilePath -Prompt 'FortiGate CSR' -Filter 'Certificate requests (*.csr;*.req)|*.csr;*.req|All files (*.*)|*.*' -AllowBack
+if (Test-NSPBackSignal $csr) { return }
+```
+
 `Read-NSPMenu` is for screens with more than a plain list. Choices are numbered in order
 unless they carry a `Key` (such as `N` for New), may carry a muted `Help` line and a `Section`
 title, and `-Inline` lays them across the line under a dashboard. Keys are shown yellow.

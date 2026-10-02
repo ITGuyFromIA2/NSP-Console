@@ -1,6 +1,6 @@
 @{
     RootModule = 'NSP.Console.psm1'
-    ModuleVersion = '0.1.2'
+    ModuleVersion = '0.1.3'
     GUID = '49cc39d3-fc4f-44a3-ac3e-e815a99309d6'
     Author = 'Network Systems Plus'
     CompanyName = 'Network Systems Plus'
@@ -22,6 +22,7 @@
         'Read-NSPNonEmpty'
         'Read-NSPOptional'
         'Test-NSPBackSignal'
+        'Read-NSPFilePath'
     )
     CmdletsToExport = @()
     VariablesToExport = @()
@@ -31,7 +32,7 @@
             Tags = @('Console', 'Prompt', 'PowerShell', 'Windows')
             ProjectUri = 'https://github.com/ITGuyFromIA2/NSP-Console'
             LicenseUri = 'https://github.com/ITGuyFromIA2/NSP-Console/blob/main/LICENSE'
-            ReleaseNotes = '0.1.2: Read-NSPNonEmpty and Read-NSPOptional (required and optional value prompts with keep-current, default, and B-to-go-back), Test-NSPBackSignal.'
+            ReleaseNotes = '0.1.3: Read-NSPFilePath - an existing file through a Windows file picker or a typed/pasted path (works in elevated consoles, where drag-and-drop is blocked). Set-NSPConsoleMaximized is an advanced function.'
         }
     }
 }

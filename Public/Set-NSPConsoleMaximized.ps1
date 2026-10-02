@@ -11,7 +11,11 @@ function Set-NSPConsoleMaximized {
         UI Automation reaches the visible terminal window by walking from its
         focused control to the containing Window. This avoids relying on a
         pseudoconsole handle or resizing character-cell buffers.
+    .EXAMPLE
+        Set-NSPConsoleMaximized
     #>
+    [CmdletBinding()]
+    param()
     try {
         Add-Type -AssemblyName UIAutomationClient -ErrorAction Stop
         Add-Type -AssemblyName UIAutomationTypes -ErrorAction Stop

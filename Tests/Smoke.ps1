@@ -10,7 +10,7 @@ $expected = @(
     'Get-NSPConsoleColumnLayout', 'Set-NSPConsoleMaximized',
     'Read-NSPMenu', 'Write-NSPConsoleHeader', 'Write-NSPConsoleRule',
     'Write-NSPConsoleSegment', 'Get-NSPConsoleWidth', 'Clear-NSPConsole',
-    'Read-NSPNonEmpty', 'Read-NSPOptional', 'Test-NSPBackSignal'
+    'Read-NSPNonEmpty', 'Read-NSPOptional', 'Test-NSPBackSignal', 'Read-NSPFilePath'
 )
 $actual = @(Get-Command -Module NSP.Console | Select-Object -ExpandProperty Name)
 if (@(Compare-Object $expected $actual).Count) { throw 'The exported command set differs from the manifest.' }
@@ -71,7 +71,24 @@ try {
     $threw = $false
     try { Read-NSPNonEmpty -Prompt 'Name' -Answer ' ' } catch { $threw = $true }
     if (-not $threw) { throw 'A blank -Answer with no current value must throw.' }
-    # Read-NSPOptional: single prompt, blank -> default, back signal.
+    # Read-NSPFilePath: quotes stripped, full path back, missing file / back signal; the picker is never opened here.
+$env:NSP_NO_FILEDIALOG = '1'
+$tmpFile = Join-Path ([IO.Path]::GetTempPath()) ('nspconsole_' + [guid]::NewGuid().ToString('N') + '.csr')
+Set-Content -LiteralPath $tmpFile -Value 'x'
+try {
+    $full = (Resolve-Path -LiteralPath $tmpFile).ProviderPath
+    if ((Read-NSPFilePath -Prompt 'CSR' -Answer ('"' + $tmpFile + '"')) -ne $full) { throw 'Read-NSPFilePath did not strip quotes and return the full path.' }
+    $threw = $false; try { Read-NSPFilePath -Prompt 'CSR' -Answer ($tmpFile + '.missing') } catch { $threw = $true }
+    if (-not $threw) { throw 'Read-NSPFilePath accepted a missing file.' }
+    if (-not (Test-NSPBackSignal (Read-NSPFilePath -Prompt 'CSR' -AllowBack -Answer 'back'))) { throw 'Read-NSPFilePath back was not signalled.' }
+    foreach ($a in @('', ($tmpFile + '.missing'), $tmpFile)) { $script:answers.Enqueue($a) }
+    if ((Read-NSPFilePath -Prompt 'CSR') -ne $full) { throw 'Read-NSPFilePath did not re-ask after a blank (no picker) and a missing path.' }
+} finally {
+    [IO.File]::Delete($tmpFile)
+    $env:NSP_NO_FILEDIALOG = $null
+}
+
+# Read-NSPOptional: single prompt, blank -> default, back signal.
     $script:answers.Enqueue('')
     if ((Read-NSPOptional -Prompt 'Filter') -ne '') { throw 'Read-NSPOptional blank did not return empty.' }
     if ((Read-NSPOptional -Prompt 'Port' -Default '1812' -Answer '') -ne '1812') { throw 'Blank did not return the default.' }
