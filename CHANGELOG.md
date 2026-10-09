@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- Release routine: `tools\Publish-ToGallery.ps1` now runs `Publish-NSPModule` from NSP.RepoTools, the checks every NSP module shares (including a client-reference sweep of the Git history). No change to the module itself.
+
 ## 0.1.3
 
 `Read-NSPFilePath` asks for an existing file: Enter opens a Windows file picker (on its own STA
