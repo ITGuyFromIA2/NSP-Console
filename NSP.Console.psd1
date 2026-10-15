@@ -1,6 +1,6 @@
 @{
     RootModule = 'NSP.Console.psm1'
-    ModuleVersion = '0.1.4'
+    ModuleVersion = '0.1.5'
     GUID = '49cc39d3-fc4f-44a3-ac3e-e815a99309d6'
     Author = 'Network Systems Plus'
     CompanyName = 'Network Systems Plus'
@@ -23,6 +23,7 @@
         'Read-NSPOptional'
         'Test-NSPBackSignal'
         'Read-NSPFilePath'
+        'Read-NSPFolderPath'
     )
     CmdletsToExport = @()
     VariablesToExport = @()
@@ -32,7 +33,7 @@
             Tags = @('Console', 'Prompt', 'PowerShell', 'Windows')
             ProjectUri = 'https://github.com/ITGuyFromIA2/NSP-Console'
             LicenseUri = 'https://github.com/ITGuyFromIA2/NSP-Console/blob/main/LICENSE'
-            ReleaseNotes = '0.1.4: release routine moved to Publish-NSPModule (NSP.RepoTools); no change to the module itself.'
+            ReleaseNotes = '0.1.5: Read-NSPFolderPath - a folder prompt with a Windows folder picker, optional default and -Create.'
         }
     }
 }

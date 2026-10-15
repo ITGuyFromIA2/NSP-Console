@@ -10,7 +10,7 @@ $expected = @(
     'Get-NSPConsoleColumnLayout', 'Set-NSPConsoleMaximized',
     'Read-NSPMenu', 'Write-NSPConsoleHeader', 'Write-NSPConsoleRule',
     'Write-NSPConsoleSegment', 'Get-NSPConsoleWidth', 'Clear-NSPConsole',
-    'Read-NSPNonEmpty', 'Read-NSPOptional', 'Test-NSPBackSignal', 'Read-NSPFilePath'
+    'Read-NSPNonEmpty', 'Read-NSPOptional', 'Test-NSPBackSignal', 'Read-NSPFilePath', 'Read-NSPFolderPath'
 )
 $actual = @(Get-Command -Module NSP.Console | Select-Object -ExpandProperty Name)
 if (@(Compare-Object $expected $actual).Count) { throw 'The exported command set differs from the manifest.' }
@@ -85,6 +85,34 @@ try {
     if ((Read-NSPFilePath -Prompt 'CSR') -ne $full) { throw 'Read-NSPFilePath did not re-ask after a blank (no picker) and a missing path.' }
 } finally {
     [IO.File]::Delete($tmpFile)
+    $env:NSP_NO_FILEDIALOG = $null
+}
+
+    # Read-NSPFolderPath: quotes stripped, default, -Create, file/missing refused, back; no picker opened.
+$env:NSP_NO_FILEDIALOG = '1'
+$tmpDir = Join-Path ([IO.Path]::GetTempPath()) ('nspconsole_' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $tmpDir | Out-Null
+try {
+    $fullDir = (Resolve-Path -LiteralPath $tmpDir).ProviderPath
+    $aFile = Join-Path $tmpDir 'a.txt'; Set-Content -LiteralPath $aFile -Value 'x'
+    if ((Read-NSPFolderPath -Prompt 'Folder' -Answer ('"' + $tmpDir + '"')) -ne $fullDir) { throw 'Read-NSPFolderPath did not strip quotes and return the full path.' }
+    if ((Read-NSPFolderPath -Prompt 'Folder' -Default $tmpDir -Answer '') -ne $fullDir) { throw 'Read-NSPFolderPath blank did not return the default.' }
+    $threw = $false; try { Read-NSPFolderPath -Prompt 'Folder' -Answer (Join-Path $tmpDir 'missing') } catch { $threw = $true }
+    if (-not $threw) { throw 'Read-NSPFolderPath accepted a missing folder.' }
+    $threw = $false; try { Read-NSPFolderPath -Prompt 'Folder' -Answer $aFile } catch { $threw = $true }
+    if (-not $threw) { throw 'Read-NSPFolderPath accepted a file.' }
+    $made = Join-Path $tmpDir 'new\deeper'
+    if ((Read-NSPFolderPath -Prompt 'Folder' -Create -Answer $made) -ne $made -or -not (Test-Path -LiteralPath $made -PathType Container)) { throw 'Read-NSPFolderPath -Create did not create the folder.' }
+    if (-not (Test-NSPBackSignal (Read-NSPFolderPath -Prompt 'Folder' -AllowBack -Answer 'B'))) { throw 'Read-NSPFolderPath back was not signalled.' }
+    # Interactive: blank (no picker) re-asks, a file re-asks, a missing folder with -Create is confirmed.
+    $asked = Join-Path $tmpDir 'asked'
+    foreach ($a in @('', $aFile, $asked, 'y')) { $script:answers.Enqueue($a) }
+    if ((Read-NSPFolderPath -Prompt 'Folder' -Create) -ne $asked -or -not (Test-Path -LiteralPath $asked)) { throw 'Read-NSPFolderPath did not re-ask, then create after confirming.' }
+    # Interactive with a default: '?' asks for the picker (unavailable here), then blank takes the default.
+    foreach ($a in @('?', '')) { $script:answers.Enqueue($a) }
+    if ((Read-NSPFolderPath -Prompt 'Folder' -Default $tmpDir) -ne $fullDir) { throw 'Read-NSPFolderPath ? / default did not behave.' }
+} finally {
+    Remove-Item -LiteralPath $tmpDir -Recurse -Force -ErrorAction SilentlyContinue
     $env:NSP_NO_FILEDIALOG = $null
 }
 

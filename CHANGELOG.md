@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5
+
+`Read-NSPFolderPath` asks for a folder: Enter opens a Windows folder picker (on its own STA thread, as
+`Read-NSPFilePath`'s file picker), or the path can be typed or pasted - Explorer's "Copy as path"
+quotes are removed. With `-Default` a blank answer takes the default and `?` opens the picker.
+`-Create` offers to create a missing folder. Same no-picker rules (remote session, Server Core,
+`NSP_NO_FILEDIALOG=1`), `-AllowBack` and `-Answer` as the other prompts.
+
 ## 0.1.4
 
 - Release routine: `tools\Publish-ToGallery.ps1` now runs `Publish-NSPModule` from NSP.RepoTools, the checks every NSP module shares (including a client-reference sweep of the Git history). No change to the module itself.

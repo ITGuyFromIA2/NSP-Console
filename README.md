@@ -49,6 +49,14 @@ $csr = Read-NSPFilePath -Prompt 'FortiGate CSR' -Filter 'Certificate requests (*
 if (Test-NSPBackSignal $csr) { return }
 ```
 
+`Read-NSPFolderPath` is the same for a folder: Enter opens a Windows folder picker, or type or paste
+the path. With `-Default`, a blank answer takes the default and `?` opens the picker. `-Create`
+offers to create a folder that doesn't exist:
+
+```powershell
+$dir = Read-NSPFolderPath -Prompt 'Capture folder' -Default 'D:\Captures' -Create
+```
+
 `Read-NSPMenu` is for screens with more than a plain list. Choices are numbered in order
 unless they carry a `Key` (such as `N` for New), may carry a muted `Help` line and a `Section`
 title, and `-Inline` lays them across the line under a dashboard. Keys are shown yellow.
